@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.2/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h1>WebSocket Test</h1>
+<div id="messages"></div>
+<script type="text/javascript">
+    var stompClient = null;
+
+    function connect() {
+        console.log("Connecting")
+        var socket = new SockJS('/monitorx-connect');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/error-logs', function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        });
+    }
+
+    function showMessage(message) {
+        var messagesDiv = document.getElementById('messages');
+        var messageParagraph = document.createElement('p');
+        messageParagraph.appendChild(document.createTextNode('ErrorLog: ' + message.message + ' at ' + message.timestamp));
+        messagesDiv.appendChild(messageParagraph);
+    }
+
+    connect();
+</script>
+</body>
+</html>

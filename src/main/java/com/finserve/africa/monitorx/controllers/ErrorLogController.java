@@ -1,27 +1,30 @@
 package com.finserve.africa.monitorx.controllers;
 
 import com.finserve.africa.monitorx.entities.ErrorLog;
+import com.finserve.africa.monitorx.payloads.ErrorLogDto;
 import com.finserve.africa.monitorx.services.ErrorLogServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("/api/v1")
 public class ErrorLogController {
-
     private final ErrorLogServiceImpl logService;
-
-    public ErrorLogController(ErrorLogServiceImpl logService) {
+    private final SimpMessagingTemplate messagingTemplate;
+    public ErrorLogController(ErrorLogServiceImpl logService, SimpMessagingTemplate messagingTemplate) {
         this.logService = logService;
+        this.messagingTemplate = messagingTemplate;
     }
 
-    @PostMapping("/log")
-    public ResponseEntity<String> logError(@RequestBody ErrorLog errorLog) {
+    @PostMapping("/error-logs")
+    public ResponseEntity<ErrorLogDto> logError(@RequestBody ErrorLogDto errorLogDto) {
+        ModelMapper mapper = new ModelMapper();
+        ErrorLog errorLog = mapper.map(errorLogDto, ErrorLog.class);
         logService.saveError(errorLog);
-        return ResponseEntity.ok("Log received");
+        // Send the created ErrorLog to WebSocket subscribers
+        messagingTemplate.convertAndSend("/topic/error-logs", errorLogDto);
+        return ResponseEntity.ok(errorLogDto);
     }
 }

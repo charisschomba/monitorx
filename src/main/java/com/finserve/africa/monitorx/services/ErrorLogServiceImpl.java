@@ -15,8 +15,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
     }
 
     @Override
-    public ErrorLog saveError(ErrorLog errorLog) {
+    public void saveError(ErrorLog errorLog) {
         errorLogRepository.save(errorLog);
-        return null;
     }
 }

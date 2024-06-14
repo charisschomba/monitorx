@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
-
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @Getter
@@ -19,7 +17,6 @@ public class ErrorLog {
     private String service;
     private String message;
     private String details;
-    private String stack_trace;
     private Map<String, String> context;
 
 }
